@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <AssemblyName>TGLLM.App</AssemblyName>
+        <RootNamespace>TGLLM.App</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="VahterUtils.fs" />
+        <Compile Include="Utils.fs" />
+        <Compile Include="Types.fs" />
+        <Compile Include="llama.fs" />
+        <Compile Include="Bot.fs" />
+        <Compile Include="Program.fs"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FSharp.Control.TaskSeq" Version="0.4.0" />
+      <PackageReference Include="LLamaSharp" Version="0.19.0" />
+      <PackageReference Include="LLamaSharp.Backend.Cpu" Version="0.19.0" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+      <PackageReference Include="Telegram.Bot" Version="22.2.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+      <Content Include="Dockerfile" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,11 @@
+﻿services:
+  tgllm-app:
+    image: tgllm-app
+    build:
+      context: .
+      dockerfile: TGLLM.App/Dockerfile
+    environment:
+      BOT_TELEGRAM_TOKEN: "2345:dfgh"
+      MODEL_PATH: "/ggufs/Mistral-7B-Instruct-v0.3.IQ1_S.gguf"
+    volumes:
+      - ./ggufs/Mistral-7B-Instruct-v0.3.IQ1_S.gguf:/ggufs/Mistral-7B-Instruct-v0.3.IQ1_S.gguf:ro
