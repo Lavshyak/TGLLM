@@ -71,9 +71,10 @@ let program =
                     Console.WriteLine(``exception``.ToString())
                     Task.CompletedTask }
 
-        do! telegramClient.DropPendingUpdates() |> Async.AwaitTask;
+        do! telegramClient.DropPendingUpdates() |> Async.AwaitTask
+
         telegramClient.StartReceiving(pollingHandler, null, CancellationToken.None)
-        
+
         do! app.WaitForShutdownAsync() |> Async.AwaitTask
     }
 
