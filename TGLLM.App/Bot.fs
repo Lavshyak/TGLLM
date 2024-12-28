@@ -18,7 +18,7 @@ let onUpdate
     
     let! sentMessage= botClient.SendMessage(update.Message.Chat.Id, "Принято") |> Async.AwaitTask
     
-    do! llamaTgQueue.Enqueue(update, botClient)
+    llamaTgQueue.Enqueue(update) |> Async.Start
     
     return ()
 }

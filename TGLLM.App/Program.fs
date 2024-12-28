@@ -48,15 +48,19 @@ let program =
                     (botClient: ITelegramBotClient, update: Update, cancellationToken: CancellationToken)
                     =
                     task {
-                        if not update.Message.IsFromOffline && update.Message <> null && update.Message.Type = MessageType.Text then
-                            
+                        if
+                            not update.Message.IsFromOffline
+                            && update.Message <> null
+                            && update.Message.Type = MessageType.Text
+                        then
+
                             let lastDate = DateTime.UtcNow.AddSeconds -5
                             let messageDate = update.Message.Date
-                            
+
                             if messageDate < lastDate then
                                 printfn "пропущено старое сообщение"
                                 return ()
-                            
+
                             Console.WriteLine("new update in handler: " + update.Message.Text)
                             //let ctx = app.Services.CreateScope()
                             //let client = ctx.ServiceProvider.GetRequiredService<ITelegramBotClient>()
@@ -65,9 +69,9 @@ let program =
 
                 member this.HandleErrorAsync(botClient, ``exception``, source, cancellationToken) =
                     Console.WriteLine(``exception``.ToString())
-                    Task.CompletedTask
-                    }
+                    Task.CompletedTask }
 
+        do! telegramClient.DropPendingUpdates() |> Async.AwaitTask;
         telegramClient.StartReceiving(pollingHandler, null, CancellationToken.None)
         
         do! app.WaitForShutdownAsync() |> Async.AwaitTask
