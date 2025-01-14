@@ -9,11 +9,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="VahterUtils.fs" />
         <Compile Include="Utils.fs" />
         <Compile Include="Types.fs" />
         <Compile Include="llama.fs" />
-        <Compile Include="Bot.fs" />
         <Compile Include="Program.fs"/>
     </ItemGroup>
 
@@ -28,6 +26,9 @@
     <ItemGroup>
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
+      </Content>
+      <Content Include="botConfig.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
       <Content Include="Dockerfile" />
     </ItemGroup>
