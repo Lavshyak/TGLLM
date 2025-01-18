@@ -11,56 +11,62 @@ open LLama.Sampling
 open Telegram.Bot
 open Telegram.Bot.Types
 
-type LLamaSessionState(model: LLamaWeights, llamaContext:LLamaContext, pipeline: BaseSamplingPipeline, chatSession:ChatSession, inferenceParams:InferenceParams, botName:string, userName:string) =
-        static member Init (modelPath: string, botName:string, userName:string, systemMessage: string) =
-            async {
+type LLamaSessionState
+    (
+        model: LLamaWeights,
+        llamaContext: LLamaContext,
+        pipeline: BaseSamplingPipeline,
+        chatSession: ChatSession,
+        inferenceParams: InferenceParams,
+        botName: string,
+        userName: string
+    ) =
+    static member Init(modelPath: string, botName: string, userName: string, systemMessage: string) =
+        async {
 
-                let modelPath = modelPath
+            let modelPath = modelPath
 
-                //LLama.Native.NativeLibraryConfig.LLama.WithLibrary("/")
+            //LLama.Native.NativeLibraryConfig.LLama.WithLibrary("/")
 
-                let parameters = ModelParams modelPath
-                parameters.ContextSize <- 1024u
+            let parameters = ModelParams modelPath
+            parameters.ContextSize <- 1024u
 
-                let! model = LLamaWeights.LoadFromFileAsync parameters |> Async.AwaitTask
-                let context = model.CreateContext parameters
+            let! model = LLamaWeights.LoadFromFileAsync parameters |> Async.AwaitTask
+            let context = model.CreateContext parameters
 
-                let executor = InteractiveExecutor context
+            let executor = InteractiveExecutor context
 
-                let chatHistory = ChatHistory()
+            let chatHistory = ChatHistory()
 
-                chatHistory.AddMessage(
-                    AuthorRole.System,
-                    systemMessage
-                )
+            chatHistory.AddMessage(AuthorRole.System, systemMessage)
 
-                let session = ChatSession(executor, chatHistory)
+            let session = ChatSession(executor, chatHistory)
 
-                let pipeLine = new DefaultSamplingPipeline()
+            let pipeLine = new DefaultSamplingPipeline()
 
-                let inferenceParams = InferenceParams()
-                inferenceParams.MaxTokens <- 256
-                inferenceParams.AntiPrompts <- [ "User:" ]
-                inferenceParams.SamplingPipeline <- pipeLine
+            let inferenceParams = InferenceParams()
+            inferenceParams.MaxTokens <- 256
+            inferenceParams.AntiPrompts <- [ "User:" ]
+            inferenceParams.SamplingPipeline <- pipeLine
 
-                return new LLamaSessionState(model, context, pipeLine, session, inferenceParams, botName, userName)
-            }
-        
-        member this.Model = model
-        member this.LlamaContext = llamaContext
-        member this.Pipeline = pipeline
-        member this.ChatSession = chatSession
-        member this.InferenceParams = inferenceParams
-        member this.BotName = botName
-        member this.UserName = userName
-        
-        interface IDisposable with
-            member this.Dispose() =
-                pipeline.Dispose()
-                llamaContext.Dispose()
-                model.Dispose()
-                
-        
+            return new LLamaSessionState(model, context, pipeLine, session, inferenceParams, botName, userName)
+        }
+
+    member this.Model = model
+    member this.LlamaContext = llamaContext
+    member this.Pipeline = pipeline
+    member this.ChatSession = chatSession
+    member this.InferenceParams = inferenceParams
+    member this.BotName = botName
+    member this.UserName = userName
+
+    interface IDisposable with
+        member this.Dispose() =
+            pipeline.Dispose()
+            llamaContext.Dispose()
+            model.Dispose()
+
+
 
 type LLamaSession(llamaSessionState: LLamaSessionState) =
     member this.GetResponseFromLLamaAsync(userInput: string) =
@@ -79,12 +85,19 @@ type LLamaSession(llamaSessionState: LLamaSessionState) =
             llamaSessionState.ChatSession.RemoveLastMessage() |> ignore
             llamaSessionState.ChatSession.RemoveLastMessage() |> ignore
             llamaSessionState.Pipeline.Reset()
-            
-            let startIdx = match unitedResponse.ToLower().IndexOf(llamaSessionState.BotName.ToLower()+": ") with | idx when idx = -1 -> 0 | idx -> idx+(llamaSessionState.BotName.Length + 2)
-            let endIdx = match unitedResponse.ToLower().IndexOf(llamaSessionState.UserName.ToLower()+":") with | idx when idx = -1 -> unitedResponse.Length-1 | idx -> idx
-            
-            let reply = unitedResponse.Substring(startIdx, endIdx-startIdx)
-            
+
+            let startIdx =
+                match unitedResponse.ToLower().IndexOf(llamaSessionState.BotName.ToLower() + ": ") with
+                | idx when idx = -1 -> 0
+                | idx -> idx + (llamaSessionState.BotName.Length + 2)
+
+            let endIdx =
+                match unitedResponse.ToLower().IndexOf(llamaSessionState.UserName.ToLower() + ":") with
+                | idx when idx = -1 -> unitedResponse.Length - 1
+                | idx -> idx
+
+            let reply = unitedResponse.Substring(startIdx, endIdx - startIdx)
+
             return reply
         }
 
@@ -162,7 +175,7 @@ type LLamaTgQueue(llamaSession: LLamaSession, tgBot: ITelegramBotClient) =
             let! _ = tgBot.SendMessage(update.Message.Chat.Id, "Ожидание ответа") |> Async.AwaitTask
 
             Console.WriteLine("Wait for response from llm " + update.Id.ToString())
-            let! response = llamaSession.GetResponseFromLLamaAsync ("User: " + update.Message.Text)
+            let! response = llamaSession.GetResponseFromLLamaAsync("User: " + update.Message.Text)
 
             Console.WriteLine("Recieved response form llm " + update.Id.ToString())
 
