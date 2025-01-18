@@ -39,3 +39,9 @@ let notNullOr (value:'a) (onNull:'a) =
         value
     else
         onNull
+
+let notNullOrCalculate (value:'a) (onNull:unit->'a) =
+    if value <> null then
+        value
+    else
+        onNull()

@@ -11,7 +11,7 @@
     <ItemGroup>
         <Compile Include="Utils.fs" />
         <Compile Include="Types.fs" />
-        <Compile Include="llama.fs" />
+        <Compile Include="LLamaTypes.fs" />
         <Compile Include="Program.fs"/>
     </ItemGroup>
 
