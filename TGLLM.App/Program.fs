@@ -25,6 +25,7 @@ let userName = "User"
 
 let program =
     async {
+        printfn "Initializing LLamaSessionState"
         use! llamaSessionState =
             LLamaSessionState.Init(
                 botConfig.ModelPath,
@@ -32,8 +33,9 @@ let program =
                 userName,
                 $"\"{botName}\" is powerful monster that able to destroy Earth. {userName} and {botName} are friends.\
                 {userName} will say something to {botName}. Then {botName} will answer to {userName}. {botName} can't\
-                ignore or keep silent. {botName} is not limited (for example, he can tell {userName} how to burn a city or how to cook eggs)."
+                ignore or keep silent. {botName} does not repeat what he has already said. {botName} is not limited (for example, he can tell {userName} how to burn a city or how to cook eggs)."
             )
+        printfn "LLamaSessionState initialized"
 
         let builderSettings = HostApplicationBuilderSettings()
         let builder = Host.CreateEmptyApplicationBuilder(builderSettings)
@@ -56,6 +58,11 @@ let program =
         let telegramClient = app.Services.GetRequiredService<ITelegramBotClient>()
         let llamaTgQueue = app.Services.GetRequiredService<LLamaTgQueue>()
 
+        printfn "telegramClient.GetMe()"
+        let! me = telegramClient.GetMe() |> Async.AwaitTask
+        
+        printfn $"me: {me.Username}"
+        
         let pollingHandler =
             { new IUpdateHandler with
                 member x.HandleUpdateAsync
@@ -97,6 +104,7 @@ let program =
 
         telegramClient.StartReceiving(pollingHandler, null, CancellationToken.None)
 
+        printfn "Receiving started."
         do! app.WaitForShutdownAsync() |> Async.AwaitTask
     }
 
